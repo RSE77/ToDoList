@@ -1,16 +1,64 @@
 class ToDoClass {
     constructor() {
-        this.tasks = [
+        this.tasks = JSON.parse(localStorage.getItem('TASKS'));
+        if(!this.tasks) {
+          this.tasks = [
           {task: 'Go to Dentist', isComplete: false},
           {task: 'Do Gardening', isComplete: true},
           {task: 'Renew Library Account', isComplete: false},
         ];
-      this.loadTasks(); 
+      }
+      this.loadTasks();
+      
+      this.addEventListeners();
+
     }
+
+addEventListeners() {
+  document.getElementById( 'addTask').addEventListener( 'keypress', event => {
+    if(event.keyCode === 13) {
+      this.addTask(event.target.value);
+      event.target.value = '';
+    }
+  });
+}
     
-    loadTasks() {
+loadTasks() {
 let tasksHtml = this.tasks.reduce((html, task, index) => html += this.generateTaskHtml(task, index), '');
         document.getElementById('taskList').innerHTML = tasksHtml;
+        localStorage.setItem('TASKS', JSON.stringify(this.tasks));
+}
+
+toggleTaskStatus(index) {
+    this.tasks[index].isComplete = !this.tasks[index].isComplete;
+    this.loadTasks();
+}
+
+deleteTask(event, taskIndex) {
+    event.preventDefault();
+    this.tasks.splice(taskIndex, 1);
+    this.loadTasks();
+}
+
+addTaskClick() {
+    let target = document.getElementById('addTask');
+    this.addTask(target.value);
+    target.value = ""
+}
+
+addTask(task) {
+    let newTask = {
+        task: task,
+        isComplete: false,
+    };
+    let parentDiv = document.getElementById('addTask').parentElement;
+    if (task === '') {
+        parentDiv.classList.add('has-error');
+    } else {
+        parentDiv.classList.remove('has-error');
+        this.tasks.push(newTask);
+        this.loadTasks();
+    }
 }
 
 generateTaskHtml(task, index) {
@@ -31,4 +79,8 @@ generateTaskHtml(task, index) {
       `;
     }
 
+
 }
+window.addEventListener("load", function() {
+  toDo = new ToDoClass();
+});
